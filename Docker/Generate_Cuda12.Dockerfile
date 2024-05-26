@@ -124,9 +124,6 @@ RUN adduser --disabled-password --gecos "" wildcodeuser
 # Acquire benchmark code to local
 RUN git clone -b neil-exps https://github.com/iNeil77/code-eval.git /wildcode
 
-RUN chown -R wildcodeuser:wildcodeuser /wildcode
-USER wildcodeuser
-
 WORKDIR /wildcode
 
 ENV PYTHONPATH=$PYTHONPATH:/wildcode

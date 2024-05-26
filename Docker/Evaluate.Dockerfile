@@ -11,15 +11,12 @@ RUN pip install --upgrade pip
 RUN adduser --disabled-password --gecos "" wildcodeuser
 
 # Acquire benchmark code to local
-RUN git clone https://github.com/bigcode-project/code-eval.git /wildcode
+RUN git clone -b neil-exps https://github.com/iNeil77/code-eval.git /wildcode
 
 RUN cd /wildcode && pip install . && pip install -U -I -r https://raw.githubusercontent.com/bigcode-project/wildcodebench-annotation/main/requirements.txt
 
 # Pre-install the dataset
 RUN python3 -c "from wildcode.data import get_wildcodebench; get_wildcodebench()"
-
-RUN chown -R wildcodeuser:wildcodeuser /wildcode
-USER wildcodeuser
 
 WORKDIR /wildcode
 
