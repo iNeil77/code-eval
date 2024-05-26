@@ -11,7 +11,10 @@ from appdirs import user_cache_dir
 CACHE_DIR = user_cache_dir("wildcodebench")
 
 
-def get_dataset_metadata(name: str, version: str, mini: bool, noextreme: bool = False):
+def get_dataset_metadata(name: str,
+                         version: str,
+                         mini: bool,
+                         noextreme: bool = False):
     assert name in ["WildCodeBench"], f"Unknown/unsupported dataset: {name}"
     extra = ""
     assert not (mini and noextreme), "Cannot have both mini and noextreme"
@@ -19,7 +22,8 @@ def get_dataset_metadata(name: str, version: str, mini: bool, noextreme: bool = 
         extra = "-Mini"
     if noextreme:
         extra = "-NoExtreme"
-    url = f"https://github.com/bigcode-project/wildcodebench-annotation/releases/download/{version}/{name}{extra}.jsonl.gz"
+    #url = f"https://github.com/bigcode-project/wildcodebench-annotation/releases/download/{version}/{name}{extra}.jsonl.gz"
+    url = "https://github.com/iNeil77/code-eval/releases/download/v0.1/wild-code-bench.jsonl.gz"
     cache_path = os.path.join(CACHE_DIR, f"{name}{extra}-{version}.jsonl")
     return url, cache_path
 

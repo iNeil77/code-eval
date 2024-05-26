@@ -122,19 +122,21 @@ RUN source /Miniforge/etc/profile.d/conda.sh \
 RUN adduser --disabled-password --gecos "" wildcodeuser
 
 # Acquire benchmark code to local
-RUN git clone https://github.com/bigcode-project/code-eval.git /wildcode
+RUN git clone -b neil-exps https://github.com/iNeil77/code-eval.git /wildcode
 
 RUN chown -R wildcodeuser:wildcodeuser /wildcode
 USER wildcodeuser
+
+WORKDIR /wildcode
+
+ENV PYTHONPATH=$PYTHONPATH:/wildcode
 
 # Install Code-Eval and pre-load the dataset
 RUN source /Miniforge/etc/profile.d/conda.sh \
     && source /Miniforge/etc/profile.d/mamba.sh \
     && mamba activate Code-Eval \
-    && pip install wild-code --upgrade \
+    && pip install -e . \
     && python -c "from wildcode.data import get_wildcodebench; get_wildcodebench()"
-
-WORKDIR /wildcode
 
 # Declare an argument for the huggingface token
 ARG HF_TOKEN
