@@ -18,6 +18,9 @@ RUN cd /wildcode && pip install . && pip install -U -I -r https://raw.githubuser
 # Pre-install the dataset
 RUN python3 -c "from wildcode.data import get_wildcodebench; get_wildcodebench()"
 
+RUN chown -R wildcodeuser:wildcodeuser /wildcode
+USER wildcodeuser
+
 WORKDIR /wildcode
 
 ENTRYPOINT ["python3", "-m", "wildcode.evaluate"]

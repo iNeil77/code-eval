@@ -118,9 +118,6 @@ RUN source /Miniforge/etc/profile.d/conda.sh \
     && pip install --no-cache-dir ninja packaging psutil \
     && pip install flash-attn==2.5.8 --no-build-isolation
 
-# Add a new user "wildcodeuser"
-RUN adduser --disabled-password --gecos "" wildcodeuser
-
 # Acquire benchmark code to local
 RUN git clone -b neil-exps https://github.com/iNeil77/code-eval.git /wildcode
 
