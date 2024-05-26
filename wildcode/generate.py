@@ -1,7 +1,6 @@
 import os
 import json
 import argparse
-import random
 from wildcode.model import DecoderBase, make_model
 from rich.progress import (
     BarColumn,
@@ -22,7 +21,6 @@ def codegen(
     n_samples=1,
     id_range=None,
     resume=True,
-    subsample_size=None,
 ):
     with Progress(
             TextColumn(f"{dataset} •" +
@@ -36,14 +34,6 @@ def codegen(
             from wildcode.data import get_wildcodebench, write_jsonl
 
             dataset = get_wildcodebench()
-            if subsample_size:
-                if subsample_size < len(dataset):
-                    key_list = list(dataset.keys())
-                    random.shuffle(key_list)
-                    dataset = {
-                        key: dataset[key]
-                        for key in key_list[:subsample_size]
-                    }
 
         if model.is_direct_completion() and nl2code:
             raise Exception(
@@ -123,7 +113,6 @@ def main():
     parser.add_argument("--model", required=True, type=str)
     parser.add_argument("--dataset", required=True, type=str)
     parser.add_argument("--save_path", default=None, type=str)
-    parser.add_argument("--subsample_size", default=None, type=int)
     parser.add_argument("--nl2code", action='store_true')
     parser.add_argument("--bs", default=1, type=int)
     parser.add_argument("--n_samples", default=1, type=int)
@@ -184,7 +173,6 @@ def main():
         n_samples=args.n_samples,
         resume=args.resume,
         id_range=args.id_range,
-        subsample_size=args.subsample_size,
     )
 
 
