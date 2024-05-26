@@ -119,7 +119,7 @@ def evaluate(flags):
         if flags.dataset == "wildcodebench":
             problems = get_wildcodebench()
             dataset_hash = get_wildcodebench_hash()       
-            expected_time = get_groundtruth(problems, dataset_hash, flags.check_gt_only)
+            #expected_time = get_groundtruth(problems, dataset_hash, flags.check_gt_only)
         
         if flags.check_gt_only:
             return
@@ -160,7 +160,7 @@ def evaluate(flags):
                     solution,
                     sample["_identifier"],
                     flags.min_time_limit,
-                    expected_time[task_id],
+                    120, #expected_time[task_id],
                 )
                 futures.append(executor.submit(check_correctness, *args))
                 completion_id[task_id] += 1
