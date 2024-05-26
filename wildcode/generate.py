@@ -1,7 +1,7 @@
 import os
 import json
 import argparse
-
+import random
 from wildcode.model import DecoderBase, make_model
 from rich.progress import (
     BarColumn,
@@ -25,11 +25,12 @@ def codegen(
     subsample_size=None,
 ):
     with Progress(
-        TextColumn(f"{dataset} •" + "[progress.percentage]{task.percentage:>3.0f}%"),
-        BarColumn(),
-        MofNCompleteColumn(),
-        TextColumn("•"),
-        TimeElapsedColumn(),
+            TextColumn(f"{dataset} •" +
+                       "[progress.percentage]{task.percentage:>3.0f}%"),
+            BarColumn(),
+            MofNCompleteColumn(),
+            TextColumn("•"),
+            TimeElapsedColumn(),
     ) as p:
         if dataset == "wildcodebench":
             from wildcode.data import get_wildcodebench, write_jsonl
@@ -37,10 +38,17 @@ def codegen(
             dataset = get_wildcodebench()
             if subsample_size:
                 if subsample_size < len(dataset):
-                    dataset = dataset[:subsample_size]
+                    key_list = list(dataset.keys())
+                    random.shuffle(key_list)
+                    dataset = {
+                        key: dataset[key]
+                        for key in key_list[:subsample_size]
+                    }
 
         if model.is_direct_completion() and nl2code:
-            raise Exception("Base model does not support direct completion for NL2Code tasks")
+            raise Exception(
+                "Base model does not support direct completion for NL2Code tasks"
+            )
 
         # create save_path if it doesn't exist, e.g., a/b.jsonl
         dirname = os.path.dirname(save_path)
@@ -51,7 +59,8 @@ def codegen(
                 id_num = int(task_id.split("/")[1])
                 low, high = id_range
                 if id_num < low or id_num >= high:
-                    p.console.print(f"Skipping {task_id} as it is not in {id_range}")
+                    p.console.print(
+                        f"Skipping {task_id} as it is not in {id_range}")
                     continue
 
             p_name = task_id.replace("/", "_")
@@ -64,7 +73,10 @@ def codegen(
             n_existing = 0
             if resume:
                 if os.path.exists(save_path):
-                    n_existing = len([1 for line in existing_data if json.loads(line)["task_id"] == task_id])
+                    n_existing = len([
+                        1 for line in existing_data
+                        if json.loads(line)["task_id"] == task_id
+                    ])
                 else:
                     n_existing = 0
                 if n_existing > 0:
@@ -88,19 +100,18 @@ def codegen(
                 assert outputs, "No outputs from model!"
                 if model.is_direct_completion():
                     samples = [
-                        dict(
-                            task_id=task_id,
-                            solution=task["prompt"]+completion
-                        )
-                        for task_id, completion in zip([task_id]*len(outputs), outputs)
+                        dict(task_id=task_id,
+                             solution=task["prompt"] + completion)
+                        for task_id, completion in zip([task_id] *
+                                                       len(outputs), outputs)
                     ]
                 else:
                     samples = [
                         dict(
                             task_id=task_id,
                             solution=completion,
-                        )
-                        for task_id, completion in zip([task_id]*len(outputs), outputs)
+                        ) for task_id, completion in zip([task_id] *
+                                                         len(outputs), outputs)
                     ]
                 print(f"Generated {len(samples)} samples")
                 write_jsonl(save_path, samples, append=True)
