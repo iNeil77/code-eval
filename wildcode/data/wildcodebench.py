@@ -1,10 +1,8 @@
 import hashlib
-import json
 import os
 from typing import Dict
 
 from wildcode.data.utils import (
-    CACHE_DIR,
     completeness_check,
     get_dataset_metadata,
     make_cache,
@@ -12,7 +10,7 @@ from wildcode.data.utils import (
 )
 
 WILDCODEBENCH_OVERRIDE_PATH = os.environ.get("WILDCODEBENCH_OVERRIDE_PATH", None)
-WILDCODEBENCH_VERSION = "v0.1.1"
+WILDCODEBENCH_VERSION = "v0.3"
 
 def _ready_wildcodebench_path(mini=False, noextreme=False, version="default") -> str:
     if WILDCODEBENCH_OVERRIDE_PATH:
@@ -20,7 +18,7 @@ def _ready_wildcodebench_path(mini=False, noextreme=False, version="default") ->
 
     version = WILDCODEBENCH_VERSION if version == "default" else version
     url, path = get_dataset_metadata(
-        "WildCodeBench", WILDCODEBENCH_VERSION, mini, noextreme
+        "wild-code-bench", WILDCODEBENCH_VERSION, mini, noextreme
     )
     make_cache(url, path)
 
