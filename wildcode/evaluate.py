@@ -227,6 +227,7 @@ def evaluate(flags):
         print(f"Backup {result_path} to {new_path}")
     else:
         try:
+            os.makedirs(os.path.dirname(result_path), exist_ok=True)
             with open(result_path, "w") as f:
                 json.dump(results, f)
         except Exception as e:
