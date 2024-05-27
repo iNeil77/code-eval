@@ -99,11 +99,13 @@ def evaluate(flags):
         
     assert flags.samples.endswith(".jsonl")
     if flags.base_dir is None:
+        summary_path = flags.samples.replace(".jsonl", "_summary.json")
         if flags.reprompt:
             result_path = flags.samples.replace(".jsonl", "_reprompt_eval_results.json")
         else:
             result_path = flags.samples.replace(".jsonl", "_eval_results.json")
     else:
+        summary_path = os.path.join(flags.base_dir, "summary.json")
         result_path = os.path.join(flags.base_dir, "eval_results.json")
 
     if os.path.isfile(result_path):
@@ -219,17 +221,28 @@ def evaluate(flags):
 
     # save results
     if os.path.isfile(result_path):
-        # mv the file to a backup
-        new_path = result_path + ".bak"
-        while os.path.isfile(new_path):
-            new_path += ".bak"
-        os.rename(result_path, new_path)
-        print(f"Backup {result_path} to {new_path}")
+        try:
+            # mv the file to a backup
+            new_path = result_path + ".bak"
+            while os.path.isfile(new_path):
+                new_path += ".bak"
+            os.rename(result_path, new_path)
+            print(f"Backup {result_path} to {new_path}")
+            os.makedirs(os.path.dirname(result_path), exist_ok=True)
+            with open(result_path, "w") as f:
+                json.dump(results, f)
+            with open(summary_path, "w") as f:
+                json.dump(pass_at_k, f)
+        except Exception as e:
+            warn(f"Failed to save the results due to Exceptions: {e}")
+            return
     else:
         try:
             os.makedirs(os.path.dirname(result_path), exist_ok=True)
             with open(result_path, "w") as f:
                 json.dump(results, f)
+            with open(summary_path, "w") as f:
+                json.dump(pass_at_k, f)
         except Exception as e:
             warn(f"Failed to save the results due to Exceptions: {e}")
             return
