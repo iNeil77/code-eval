@@ -97,17 +97,14 @@ def evaluate(flags):
         # bypass the samples
         flags.samples = "__dummy__.jsonl"
         
-    if os.path.isdir(flags.samples):
-        if flags.reprompt:
-            result_path = os.path.join(flags.samples, "reprompt_eval_results.json")
-        else:
-            result_path = os.path.join(flags.samples, "eval_results.json")
-    else:
-        assert flags.samples.endswith(".jsonl")
+    assert flags.samples.endswith(".jsonl")
+    if flags.base_dir is None:
         if flags.reprompt:
             result_path = flags.samples.replace(".jsonl", "_reprompt_eval_results.json")
         else:
             result_path = flags.samples.replace(".jsonl", "_eval_results.json")
+    else:
+        result_path = os.path.join(flags.base_dir, "eval_results.json")
 
     if os.path.isfile(result_path):
         print(f"Load from previous results from {result_path}")
@@ -119,7 +116,7 @@ def evaluate(flags):
         if flags.dataset == "wildcodebench":
             problems = get_wildcodebench()
             dataset_hash = get_wildcodebench_hash()       
-            #expected_time = get_groundtruth(problems, dataset_hash, flags.check_gt_only)
+            expected_time = get_groundtruth(problems, dataset_hash, flags.check_gt_only)
         
         if flags.check_gt_only:
             return
@@ -160,7 +157,7 @@ def evaluate(flags):
                     solution,
                     sample["_identifier"],
                     flags.min_time_limit,
-                    120, #expected_time[task_id],
+                    expected_time[task_id]
                 )
                 futures.append(executor.submit(check_correctness, *args))
                 completion_id[task_id] += 1
@@ -222,22 +219,19 @@ def evaluate(flags):
 
     # save results
     if os.path.isfile(result_path):
-        decision = ""
-        while decision.lower() not in ["y", "n"]:
-            print(f"{result_path} already exists. Press [Y/N] to overwrite or exit...")
-            decision = input()
-
-        if decision.lower() == "y":
-            # mv the file to a backup
-            new_path = result_path + ".bak"
-            while os.path.isfile(new_path):
-                new_path += ".bak"
-            os.rename(result_path, new_path)
-            print(f"Backup {result_path} to {new_path}")
-
-    if not os.path.isfile(result_path):
-        with open(result_path, "w") as f:
-            json.dump(results, f)
+        # mv the file to a backup
+        new_path = result_path + ".bak"
+        while os.path.isfile(new_path):
+            new_path += ".bak"
+        os.rename(result_path, new_path)
+        print(f"Backup {result_path} to {new_path}")
+    else:
+        try:
+            with open(result_path, "w") as f:
+                json.dump(results, f)
+        except Exception as e:
+            warn(f"Failed to save the results due to Exceptions: {e}")
+            return
 
 
 def main():
@@ -248,6 +242,7 @@ def main():
     parser.add_argument("--samples", required=True, type=str)
     parser.add_argument("--parallel", default=None, type=int)
     parser.add_argument("--min-time-limit", default=1, type=float)
+    parser.add_argument("--base-dir", default=None, type=str)
     parser.add_argument(
         "--reprompt", action="store_true", help="Prepend the prompt again"
     )
