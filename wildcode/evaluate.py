@@ -117,8 +117,9 @@ def evaluate(flags):
     else:
         if flags.dataset == "wildcodebench":
             problems = get_wildcodebench()
-            dataset_hash = get_wildcodebench_hash()       
-            expected_time = get_groundtruth(problems, dataset_hash, flags.check_gt_only)
+            dataset_hash = get_wildcodebench_hash()
+            if not flags.check_solution_only:
+                expected_time = get_groundtruth(problems, dataset_hash, flags.check_gt_only)
         
         if flags.check_gt_only:
             return
@@ -159,7 +160,7 @@ def evaluate(flags):
                     solution,
                     sample["_identifier"],
                     flags.min_time_limit,
-                    expected_time[task_id]
+                    expected_time[task_id] if not flags.check_solution_only else flags.min_time_limit
                 )
                 futures.append(executor.submit(check_correctness, *args))
                 completion_id[task_id] += 1
@@ -257,12 +258,9 @@ def main():
     parser.add_argument("--parallel", default=None, type=int)
     parser.add_argument("--min-time-limit", default=1, type=float)
     parser.add_argument("--base-dir", default=None, type=str)
-    parser.add_argument(
-        "--reprompt", action="store_true", help="Prepend the prompt again"
-    )
-    parser.add_argument(
-        "--check-gt-only", action="store_true", help="Check the groundtruth"
-    )
+    parser.add_argument("--reprompt", action="store_true", help="Prepend the prompt again")
+    parser.add_argument("--check-gt-only", action="store_true", help="Check the groundtruth")
+    parser.add_argument("--check-solution-only", action="store_true", help="Check the solution only")
     args = parser.parse_args()
 
     evaluate(args)

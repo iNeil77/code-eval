@@ -44,6 +44,7 @@ def codegen(
         dirname = os.path.dirname(save_path)
         if not os.path.exists(dirname) and dirname != "":
             os.makedirs(dirname)
+        os.chmod(dirname, 0o777)
         for task_id, task in p.track(dataset.items()):
             if id_range is not None:
                 id_num = int(task_id.split("/")[1])
