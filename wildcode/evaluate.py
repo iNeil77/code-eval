@@ -230,6 +230,7 @@ def evaluate(flags):
             os.rename(result_path, new_path)
             print(f"Backup {result_path} to {new_path}")
             os.makedirs(os.path.dirname(result_path), exist_ok=True)
+            os.chmod(os.path.dirname(result_path), 0o777)
             with open(result_path, "w") as f:
                 json.dump(results, f)
             with open(summary_path, "w") as f:
@@ -240,6 +241,7 @@ def evaluate(flags):
     else:
         try:
             os.makedirs(os.path.dirname(result_path), exist_ok=True)
+            os.chmod(os.path.dirname(result_path), 0o777)
             with open(result_path, "w") as f:
                 json.dump(results, f)
             with open(summary_path, "w") as f:
